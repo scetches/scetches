@@ -1,6 +1,6 @@
 'use strict';
 
-const socket = io.connect();
+const socket = io.connect('http://24.113.64.254:8080');
 
 const cursorCanvas = document.createElement('canvas');
 const cursorCtx = cursorCanvas.getContext('2d');
@@ -92,7 +92,10 @@ removeLayerBtn.addEventListener('click', (e) => {
 });
 
 joinBtn.addEventListener('click', (e) => {
-  location.hash = roomNameInput.value;
+  body.className = 'loading';
+  setTimeout(() => {
+    location.hash = roomNameInput.value;
+  }, 200);
 });
 
 fab.addEventListener('mousedown', fabMove, false);
@@ -185,7 +188,9 @@ socket.on('step', (step) => {
 socket.on('requestSync', value => socket.emit('syncCheck', value));
 
 socket.on('syncSuccess', (value, callback) => {
-  scetch.layers[value.layerId].once('sync', () => callback(scetch.syncInfo(value.layerId)))
+  scetch.layers[value.layerId].once('sync', () => {
+    callback(scetch.syncInfo(value.layerId))
+  });
 });
 
 socket.on('addLayer', (data)=>{
@@ -195,6 +200,10 @@ socket.on('addLayer', (data)=>{
 socket.on('removeLayer', (data)=>{
   scetch.removeLayer(data.layerId);
 });
+
+if(roomName.length == 0){
+  body.className = '';
+}
 
 function fabMove(e){
   let el = fab.MaterialButton.element_;
@@ -259,7 +268,6 @@ function joinRoom(){
   } else {
     roomNameInput.value = roomName;
     userNameInput.value = userName;
-    body.className = '';
   }
 }
 
